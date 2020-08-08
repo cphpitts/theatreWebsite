@@ -167,3 +167,89 @@ Below is the function to populate the Delete Confirmation modal. All modals had 
         $("#deleteMessageMaster .del_time").html($(selectedEntryId).find(".msgDate").html());
         $("#deleteMessageMaster .del_subject").html($(selectedEntryId).find(".msgSubject").html());
       }
+
+## Prevent addition of duplicate image
+Administrators on the site are able to upload pictures for cast members and productions. All of these utilize the same method to create and upload the photo data. I modified the method to search the existing photos for matching data when a user uploaded an image. If no match was found then the new photo was added to the database, otherwise the id of the current photo was returned instead to be associated with the entry.
+
+        [AllowAnonymous]
+        public static int CreatePhoto(HttpPostedFileBase file, string title)
+
+        {
+            var photo = new Photo();
+            using (ApplicationDbContext db = new ApplicationDbContext())
+            {
+                byte[] photoArray = ImageBytes(file);
+                if (db.Photo.Where(x => x.PhotoFile == photoArray).ToList().Any())
+                {
+                    var id = db.Photo.Where(x => x.PhotoFile == photoArray).ToList().FirstOrDefault().PhotoId;
+                    return id;
+                }
+                else
+                {
+                    photo.Title = title;
+                    Image image = Image.FromStream(file.InputStream, true, true);
+                    photo.OriginalHeight = image.Height;
+                    photo.OriginalWidth = image.Width;
+                    var converter = new ImageConverter();
+                    photo.PhotoFile = (byte[])converter.ConvertTo(image, typeof(byte[]));
+                    db.Photo.Add(photo);
+                    db.SaveChanges();
+                    return photo.PhotoId;
+                }
+            }
+        }
+        
+## Fix bug when deleted cast member
+There was an existing bug that would return an error when a castmember was deleted. I investigated the issue and found that the error was caused when there were parts associated with that cast member. To fix this I added a routine to the delete cast member function that searched the table of Parts and found any which the cast memeber was assigned. If matches were found, the value of that reference was changed to null.
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [TheatreAuthorize(Roles = "Admin")]
+
+        public ActionResult DeleteConfirmed(int? id)
+        {
+            CastMember castMember = db.CastMembers.Find(id);
+
+            // Before the cast member is removed.  Set the associated User CastMemberUserId to 0 if a User was assigned.
+            if (castMember.CastMemberPersonID != null)
+                db.Users.Find(castMember.CastMemberPersonID).CastMemberUserID = 0;
+
+            // Before cast memeber is removed, search for associated parts and set Person_CastMemberId to null
+            foreach (var i in db.Parts.Where(p => p.Person.CastMemberID == id))
+            {
+                i.Person = null;
+            }
+
+            db.CastMembers.Remove(castMember);
+
+            db.SaveChanges();
+            return RedirectToAction("Index");
+        }
+        
+In addition I also added some logic to the view files for the production details. There was a section on the page that listed the parts and cast members. I changed this section to not attempt the display the cast member if the value was null.
+
+    <li class="list-group-item">
+                  @(part)s
+                  <dl>
+                    @foreach (var item in parts)
+                    {
+                        if (item != null && part.ToString() == "Actor")
+                        {
+                        <dd class="col">
+                          <a href="/Part/Details/@item.PartID">@Html.Raw(@item.Character)</a>
+                        </dd>
+                        if (item.Person != null) { 
+                            <dd class="col">
+                              <p class="prod-details-actor-info"> played by <a class="prod-details-actor-info-link" href="/CastMembers/Details/@item.Person.CastMemberID">@item.Person.Name.ToString()</a></p>
+                            </dd>
+                        }
+                      }
+                      else if (item != null)
+                      {
+                        <dd class="col">
+                          <a href="/Part/Details/@item.PartID">@Html.Raw(@item.Character)</a>
+                        </dd>
+                      }
+                    }
+                  </dl>
+                </li>
