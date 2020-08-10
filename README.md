@@ -1,7 +1,7 @@
 # Live Project
 
 ## Background
-I worked for two weeks in collaboration with a team of fellow students to develop a new website for the local theatre company using ASP .Net MVC and Entity Framework.
+As part of my coursework at the Tech Academy, I worked for two weeks in collaboration with a team of fellow students to develop a new website for the local theatre company using ASP .Net MVC and Entity Framework.
 
 ## Summary
 During my time on this project I was able to work with many aspects of the website including modifying model definitions, altering information in the database and making front-end improvements. When I joined the project there had already been considerable work done so it was a new experience for me to work within an existing codebase. It was a valuable lesson in learning how to explore and learn from what had been done before so as not to duplicate unnecessary work, but also view other’s work with a critical eye so I could offer suggestions to improve the design of the site.
@@ -168,7 +168,7 @@ Below is the function to populate the Delete Confirmation modal. All modals had 
         $("#deleteMessageMaster .del_subject").html($(selectedEntryId).find(".msgSubject").html());
       }
 
-## Prevent addition of duplicate image
+## Prevent addition of duplicate images
 Administrators on the site are able to upload pictures for cast members and productions. All of these utilize the same method to create and upload the photo data. I modified the method to search the existing photos for matching data when a user uploaded an image. If no match was found then the new photo was added to the database, otherwise the id of the current photo was returned instead to be associated with the entry.
 
         [AllowAnonymous]
