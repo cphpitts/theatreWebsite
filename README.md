@@ -1,7 +1,7 @@
 # Theatre Website Code Summary
 
 ### Background
-As part of my coursework at the Tech Academy, I worked for two weeks in collaboration with a team of fellow students to develop a new website for the local theatre company using ASP .Net MVC and Entity Framework.
+As part of an internship with Prosper IT Consulting, I worked for four weeks in collaboration with a team of fellow students to develop a new website for the local theatre company using ASP .Net MVC and Entity Framework.
 
 ### Summary
 During my time on this project I was able to work with many aspects of the website including modifying model definitions, altering information in the database and making front-end improvements. When I joined the project there had already been considerable work done so it was a new experience for me to work within an existing codebase. It was a valuable lesson in learning how to explore and learn from what had been done before so as not to duplicate unnecessary work, but also view other’s work with a critical eye so I could offer suggestions to improve the design of the site.
